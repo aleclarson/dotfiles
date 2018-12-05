@@ -1,0 +1,32 @@
+[user]
+        name = aleclarson
+        email = alec.stanford.larson@gmail.com
+[credential]
+        helper = osxkeychain
+[filter "media"]
+        required = true
+        clean = git media clean %f
+        smudge = git media smudge %f
+[alias]
+        tagcommit = rev-list -n 1
+        unpushed = diff origin/master..HEAD --name-status
+        revert-unstaged = "!sh -c '{ git commit -m=tmp && git reset --hard HEAD && git reset --soft HEAD^ || git reset --hard HEAD; } > /dev/null 2>&1; git status' -"
+        rus = "!sh -c 'git revert-unstaged' -"
+        rem = remote
+        remv = remote -v
+        co = checkout
+        cob = checkout -b
+        br = branch
+        brv = branch -v
+        st = status
+        cp = cherry-pick
+        reinit = update-ref -d HEAD
+        fixup = "!sh -c '(git diff-files --quiet || (echo Unstaged changes, please commit or stash with --keep-index; exit 1)) && COMMIT=$(git rev-parse $1) && git commit --fixup=$COMMIT && git rebase -i --autosquash $COMMIT~1' -"
+        anw = !git diff -U0 -w --no-color -- \"$@\" | git apply --cached --ignore-whitespace --unidiff-zero "#"
+[push]
+        default = upstream
+[core]
+        editor = /usr/bin/vim
+        excludesfile = ~/.gitignore
+[hub]
+        password = xxx
