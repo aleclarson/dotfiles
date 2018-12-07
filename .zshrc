@@ -37,6 +37,7 @@ if [[ $- =~ i ]]; then
   [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
   # rupa/z: jump to recent directories with ease
+  export _Z_DATA="$HOME/dev/.z"
   source ~/dev/tools/z.sh
 fi
 
