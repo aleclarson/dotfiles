@@ -1,3 +1,7 @@
+# https://github.com/sindresorhus/pure
+autoload -U promptinit; promptinit
+prompt pure
+
 # Preferred CLI editor
 export EDITOR="/usr/bin/vim"
 
@@ -103,38 +107,6 @@ git-branch-delete () {
   git branch -D $1
   git push origin --delete $1
 }
-
-#################
-# Prompt layout #
-#################
-
-_pwd_three() {
-  # the path to the working directory (up to three dirs long)
-  # http://www.reddit.com/r/programming/comments/697cu/bash_users_what_do_you_have_for_your_ps1/c0382ne
-  echo ${PWD} | sed "s&${HOME}&~&" | sed "s&.*./\([^/]*/[^/]*/[^/]*\)$&\1&"
-}
-
-_parse_git_branch() {
-  # http://martinfitzpatrick.name/article/add-git-branch-name-to-terminal-prompt-mac
-  git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
-}
-
-_color() {
-  echo '\[\e[38;5;'$2'm\]'$1'\[\e[39m\]'
-}
-
-#load colors
-autoload colors && colors
-for COLOR in RED GREEN YELLOW BLUE MAGENTA CYAN BLACK WHITE; do
-    eval $COLOR='%{$fg_no_bold[${(L)COLOR}]%}'  #wrap colours between %{ %} to avoid weird gaps in autocomplete
-    eval BOLD_$COLOR='%{$fg_bold[${(L)COLOR}]%}'
-done
-eval RESET='%{$reset_color%}'
-
-# change command prompt
-PROMPT='$YELLOW$(_pwd_three)$(_parse_git_branch)$WHITE'
-PROMPT=$PROMPT' '$GREEN\$$WHITE' '
-export PROMPT
 
 #################
 # Miscellaneous #
