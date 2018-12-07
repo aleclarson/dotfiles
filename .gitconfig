@@ -27,6 +27,4 @@
         default = upstream
 [core]
         editor = /usr/bin/vim
-        excludesfile = ~/.gitignore
-[hub]
-        password = xxx
+        excludesfile = ~/dev/.gitignore
