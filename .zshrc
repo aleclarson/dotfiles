@@ -1,3 +1,13 @@
+# Which plugins would you like to load?
+# Standard plugins can be found in ~/.oh-my-zsh/plugins/*
+# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
+plugins=(fzf)
+
+# oh-my-zsh
+export ZSH=$HOME/.oh-my-zsh
+export DISABLE_LS_COLORS="true"
+source $ZSH/oh-my-zsh.sh
+
 # https://github.com/sindresorhus/pure
 autoload -U promptinit; promptinit
 prompt pure
@@ -32,9 +42,6 @@ if [[ $- =~ i ]]; then
 
   # Expand "{1-3}.png" to "1.png 2.png 3.png"
   setopt brace_ccl
-
-  # Fuzzy finder
-  [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
   # rupa/z: jump to recent directories with ease
   export _Z_DATA="$HOME/dev/.z"
