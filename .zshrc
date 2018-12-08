@@ -21,7 +21,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
 # Command registry
-export PATH="$PATH:$HOME/dev/bin"
+export PATH="$HOME/dev/bin:$PATH"
 
 # Global node_modules
 export NODE_PATH="$(pnpm root -g)"
