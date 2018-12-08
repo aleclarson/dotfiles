@@ -45,7 +45,7 @@ if [[ $- =~ i ]]; then
 
   # rupa/z: jump to recent directories with ease
   export _Z_DATA="$HOME/dev/.z"
-  source ~/dev/tools/z.sh
+  source ~/dev/scripts/z.sh
 fi
 
 ###############
