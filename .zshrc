@@ -1,7 +1,7 @@
 # Which plugins would you like to load?
 # Standard plugins can be found in ~/.oh-my-zsh/plugins/*
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
-plugins=(fzf)
+plugins=(fzf k zsh-z)
 
 # oh-my-zsh
 export ZSH=$HOME/.oh-my-zsh
@@ -14,23 +14,49 @@ prompt pure
 
 # Preferred CLI editor
 export EDITOR="/usr/bin/vim"
-
-# NodeJS version manager
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-
-# Command registry
-export PATH="$HOME/dev/bin:$PATH"
-
-# Global node_modules
-export NODE_PATH="$(pnpm root -g)"
+export REACT_EDITOR="code"
 
 # Go up two directories
 alias ...="cd ../.."
 
 # Open in text editor
 alias edit="open -a /Applications/Visual\ Studio\ Code.app"
+
+# File scaffolding
+alias ff="source ~/dev/bin/fileform"
+
+##################
+# $PATH variable #
+##################
+
+# ruby gems
+export PATH="/usr/local/Cellar/ruby/2.7.0/bin:$PATH"
+export PATH="/usr/local/lib/ruby/gems/2.7.0/bin:$PATH"
+
+# rvm
+export PATH="$PATH:$HOME/.rvm/bin"
+
+# rust
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# python
+# export PATH="$HOME/Library/Python/2.7/bin"
+
+# Custom binaries
+export PATH="$HOME/dev/bin:$PATH"
+
+###########
+# Node JS #
+###########
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+nvm use default --silent
+
+# Global node_modules
+export NODE_PATH="$(pnpm root -g)"
 
 #######################
 # Interactive options #
@@ -43,9 +69,8 @@ if [[ $- =~ i ]]; then
   # Expand "{1-3}.png" to "1.png 2.png 3.png"
   setopt brace_ccl
 
-  # rupa/z: jump to recent directories with ease
-  export _Z_DATA="$HOME/dev/.z"
-  source ~/dev/scripts/z.sh
+  # See here: https://github.com/ohmyzsh/ohmyzsh/issues/449#issuecomment-1466968
+  unsetopt extendedglob
 fi
 
 ###############
@@ -54,25 +79,22 @@ fi
 
 alias g="git"
 alias ga="git add"
+alias gp="git push"
 alias gb="git branch"
 alias gc="git commit"
 alias gd="git diff"
 alias gr="git rebase"
 alias gt="git tag"
+alias gf="git fetch"
 alias co="git checkout"
+alias gcp="git cherry-pick --continue"
 alias amend="git commit --amend --no-edit"
 
 # Shows new changes in a specific file.
-alias diff="git diff HEAD --"
+alias fdiff="git diff HEAD --"
 
 # Reverts a specific file back to the HEAD.
 alias revert="git co HEAD --"
-
-# Push the current branch to origin.
-alias push="git push origin HEAD"
-
-# Compact commit logs
-alias log="git log --oneline"
 
 # Delete a branch locally and remotely
 alias branchd="git-branch-delete"
@@ -87,6 +109,21 @@ alias tagda="git-tag-delete-all"
 
 # Remove paths matching .gitignore globs
 alias ignore="git rm -r --cached . && git add ."
+
+# Create a single commit git-patch and pbcopy it.
+pbpatch() {
+  if [ $# -eq 1 ]; then
+    git format-patch --stdout -1 $1 | pbcopy
+  elif [ $# -eq 0 ]; then
+    pbpaste | git am
+  fi
+}
+
+# gcm [commit:-HEAD]
+alias gcm="git-commit-message"
+git-commit-message () {
+  git log "$1^..$1" --pretty=%B
+}
 
 # tagd <tag> <commit> ...
 git-tag-back () {
@@ -120,9 +157,12 @@ git-branch-delete () {
 # Miscellaneous #
 #################
 
-alias renovate="wget https://gist.githubusercontent.com/aleclarson/99bf0948466ad764a2e90ae462c9d3b2/raw/renovate.json"
+alias inspect='NODE_OPTIONS="--inspect"'
+alias inspect-brk='NODE_OPTIONS="--inspect-brk"'
 
-alias linkify='xargs -I {} ln -f -s $PWD/{} $(pnpm root -g)'
+JEST_NO_CACHE="./node_modules/.bin/jest -i --no-cache --watch"
+alias jest-dbg="$JEST_NO_CACHE"
+alias jest-brk="node --inspect-brk $JEST_NO_CACHE"
 
 # rm == move to trash
 alias _rm="$(which rm)"
