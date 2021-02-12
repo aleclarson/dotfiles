@@ -49,14 +49,10 @@ export PATH="$HOME/dev/bin:$PATH"
 # Node JS #
 ###########
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-
-nvm use default --silent
+NODE_VERSION=`node -v | tr -d v`
 
 # Global node_modules
-export NODE_PATH="$(pnpm root -g)"
+export NODE_PATH="/usr/local/Cellar/node/$NODE_VERSION/pnpm-global/4/node_modules"
 
 #######################
 # Interactive options #
