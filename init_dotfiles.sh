@@ -1,6 +1,6 @@
-ln -s .vim ~
-ln -s .vimrc ~
-ln -s .zshrc ~
-ln -s .gitconfig ~
-ln -s .gitignore ~
+ln -sf $PWD/.vim ~
+ln -sf $PWD/.vimrc ~
+ln -sf $PWD/.zshrc ~
+ln -sf $PWD/.gitconfig ~
+
 rm "${BASH_SOURCE[0]}"
