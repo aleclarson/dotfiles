@@ -6,10 +6,6 @@ export ZSH=$HOME/.oh-my-zsh
 export DISABLE_LS_COLORS="true"
 source $ZSH/oh-my-zsh.sh
 
-# https://github.com/sindresorhus/pure
-autoload -U promptinit; promptinit
-prompt pure
-
 # Preferred CLI editor
 export EDITOR="/usr/bin/vim"
 export REACT_EDITOR="code"
@@ -65,6 +61,10 @@ if [[ $- =~ i ]]; then
 
   # See here: https://github.com/ohmyzsh/ohmyzsh/issues/449#issuecomment-1466968
   unsetopt extendedglob
+
+  # https://github.com/sindresorhus/pure
+  autoload -U promptinit; promptinit
+  prompt pure
 fi
 
 ###############
