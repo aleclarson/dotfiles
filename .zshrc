@@ -69,13 +69,13 @@ if [[ $- =~ i ]]; then
   # Expand "{1-3}.png" to "1.png 2.png 3.png"
   setopt brace_ccl
 
-  # See here: https://github.com/ohmyzsh/ohmyzsh/issues/449#issuecomment-1466968
-  unsetopt extendedglob
-
   # https://github.com/sindresorhus/pure
   autoload -U promptinit; promptinit
   prompt pure
 fi
+
+# See here: https://github.com/ohmyzsh/ohmyzsh/issues/449#issuecomment-1466968
+unsetopt extendedglob
 
 ###############
 # Git related #
