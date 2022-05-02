@@ -56,6 +56,8 @@ NODE_VERSION=`node -v | tr -d v`
 # Global node_modules
 export NODE_PATH="/usr/local/Cellar/node/$NODE_VERSION/pnpm-global/5/node_modules"
 
+alias tn="ts-node --project $NODE_PATH/.pnpm/ts-node@10.5.0/node_modules/ts-node/node14/tsconfig.json"
+
 #######################
 # Interactive options #
 #######################
