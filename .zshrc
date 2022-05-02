@@ -19,6 +19,11 @@ alias edit="code-insiders"
 # File scaffolding
 alias ff="source ~/dev/bin/fileform"
 
+# Lazy-loaded NodeJS version manager
+nvm() {
+  . ~/.nvm/nvm.sh && nvm $@
+}
+
 ##################
 # $PATH variable #
 ##################
