@@ -201,3 +201,6 @@ del() {
     shift
  done
 }
+
+export PNPM_HOME="/Users/alec/Library/pnpm"
+export PATH="$PNPM_HOME:$PATH"
