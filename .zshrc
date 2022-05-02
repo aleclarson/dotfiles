@@ -8,13 +8,13 @@ source $ZSH/oh-my-zsh.sh
 
 # Preferred CLI editor
 export EDITOR="/usr/bin/vim"
-export REACT_EDITOR="code"
+export REACT_EDITOR="code-insiders"
 
 # Go up two directories
 alias ...="cd ../.."
 
 # Open in text editor
-alias edit="open -a /Applications/Visual\ Studio\ Code.app"
+alias edit="code-insiders"
 
 # File scaffolding
 alias ff="source ~/dev/bin/fileform"
