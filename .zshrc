@@ -41,6 +41,9 @@ export PATH="$HOME/.cargo/bin:$PATH"
 # python
 # export PATH="$HOME/Library/Python/2.7/bin"
 
+# nim
+export PATH="/Users/alec/.nimble/bin:$PATH"
+
 # Custom binaries
 export PATH="$HOME/dev/bin:$PATH"
 
