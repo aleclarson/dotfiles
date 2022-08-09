@@ -14,7 +14,7 @@ export REACT_EDITOR="code-insiders"
 alias ...="cd ../.."
 
 # Open in text editor
-alias edit="code-insiders"
+alias edit="code"
 
 # File scaffolding
 alias ff="source ~/dev/bin/fileform"
