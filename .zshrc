@@ -54,7 +54,7 @@ export PATH="$HOME/dev/bin:$PATH"
 NODE_VERSION=`node -v | tr -d v`
 
 # Global node_modules
-export NODE_PATH="/usr/local/Cellar/node/$NODE_VERSION/pnpm-global/5/node_modules"
+export NODE_PATH="$HOME/Library/pnpm/global/5/node_modules"
 
 TSNODE_ROOT=`realpath $NODE_PATH/ts-node`
 
