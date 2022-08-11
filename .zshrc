@@ -1,5 +1,5 @@
 # oh-my-zsh plugins
-plugins=(fzf zsh-z k)
+plugins=(zsh-z fd fzf)
 
 # oh-my-zsh
 export ZSH=$HOME/.oh-my-zsh
