@@ -1,12 +1,19 @@
 set backupcopy=yes
 set clipboard=unnamed
 
+" Allow mouse
+set mouse=a
+
+" https://vi.stackexchange.com/a/28721/9245
+set re=2
+
 " Default indentation
 set expandtab
 "set tabstop=2
 set shiftwidth=2
 
 call plug#begin('~/.vim/plugged')
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'junegunn/vim-plug'
 Plug 'junegunn/limelight.vim'
 Plug 'junegunn/seoul256.vim'
@@ -22,17 +29,33 @@ Plug 'tpope/vim-fugitive'
 Plug 'vim-utils/vim-man'
 Plug 'leafgarland/typescript-vim'
 Plug 'isRuslan/vim-es6'
+Plug 'iloginow/vim-stylus'
+Plug 'sainnhe/everforest'
 call plug#end()
 
 set termguicolors
-silent! colorscheme seoul256
+silent! colorscheme everforest
 
-let g:indent_guides_enable_on_vim_startup = 1
-let g:indent_guides_guide_size = 1
-autocmd VimEnter,Colorscheme * :hi IndentGuidesEven  ctermbg=239
-autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd   ctermbg=237
+let g:indent_guides_enable_on_vim_startup = 0
 
+" CoC extensions
+let g:coc_global_extensions = ['coc-tsserver']
 
+" CoC confirm auto-completion
+inoremap <expr> <cr> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
+
+" Use K to show documentation in preview window.
+nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  elseif (coc#rpc#ready())
+    call CocActionAsync('doHover')
+  else
+    execute '!' . &keywordprg . " " . expand('<cword>')
+  endif
+endfunction
 
 " shift-up: new tab
 nmap <S-t> :tabedit<Space>
@@ -132,6 +155,9 @@ set novisualbell
 set t_vb=
 set tm=500
 
+" Fix backspace
+set backspace=indent,eol,start
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Turn persistent undo on 
 "    means that you can undo even when you close a buffer/VIM
@@ -141,3 +167,14 @@ try
     set undofile
 catch
 endtry
+
+if &term =~ "xterm\\|rxvt"
+  " use an orange cursor in insert mode
+  let &t_SI = "\<Esc>]12;orange\x7"
+  " use a red cursor otherwise
+  let &t_EI = "\<Esc>]12;red\x7"
+  silent !echo -ne "\033]12;red\007"
+  " reset cursor when vim exits
+  autocmd VimLeave * silent !echo -ne "\033]112\007"
+  " use \003]12;gray\007 for gnome-terminal
+endif

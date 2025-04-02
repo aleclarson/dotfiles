@@ -1,64 +1,57 @@
-# oh-my-zsh plugins
-plugins=(zsh-z fd fzf)
-
-# oh-my-zsh
-export ZSH=$HOME/.oh-my-zsh
-export DISABLE_LS_COLORS="true"
-source $ZSH/oh-my-zsh.sh
-
-# Preferred CLI editor
-export EDITOR="/usr/bin/vim"
-export REACT_EDITOR="code-insiders"
-
-# Go up two directories
-alias ...="cd ../.."
-
-# Open in text editor
-alias edit="code"
-
-# File scaffolding
-alias ff="source ~/dev/bin/fileform"
-
-# Lazy-loaded NodeJS version manager
-nvm() {
-  . ~/.nvm/nvm.sh && nvm $@
-}
+export HD2="/Volumes/Macintosh HD 2"
 
 ##################
 # $PATH variable #
 ##################
 
-# ruby gems
-export PATH="/usr/local/Cellar/ruby/2.7.0/bin:$PATH"
-export PATH="/usr/local/lib/ruby/gems/2.7.0/bin:$PATH"
-
-# rvm
-export PATH="$PATH:$HOME/.rvm/bin"
+# Node 23.7
+export PATH="$HOME/.nvm/versions/node/v23.7.0/bin:$PATH"
 
 # rust
-export PATH="$HOME/.cargo/bin:$PATH"
+export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
 
 # python
-# export PATH="$HOME/Library/Python/2.7/bin"
+export PATH="$HOME/.pyenv/versions/2.7.18/bin:$PATH"
 
-# nim
-export PATH="/Users/alec/.nimble/bin:$PATH"
+# postgres
+export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
+
+# go
+export GOPATH="$HOME/.go"
+export GOBIN="$GOPATH/bin"
+export PATH="$GOBIN:$PATH"
+
+# flutter
+export PATH="$HOME/dev/flutter/bin:$PATH"
 
 # Custom binaries
-export PATH="$HOME/dev/bin:$PATH"
+export PATH="$HOME/dev/bin:$HOME/.local/bin:$PATH"
 
-###########
-# Node JS #
-###########
+# homebrew
+export PATH="/usr/local/bin:$PATH"
 
-NODE_VERSION=`node -v | tr -d v`
+##############
+# ZSH config #
+##############
 
-# Global node_modules
-export NODE_PATH="$HOME/Library/pnpm/global/5/node_modules"
+# zsh functions
+fpath+=("$(brew --prefix)/share/zsh/site-functions")
 
-TSNODE_ROOT=`realpath $NODE_PATH/ts-node`
+# zsh plugins
+plugins=(z fzf careful_rm)
 
-alias tn="ts-node --project $TSNODE_ROOT/node14/tsconfig.json"
+# oh-my-zsh
+export ZSH=$HOME/.oh-my-zsh
+export DISABLE_AUTO_UPDATE=true
+export DISABLE_LS_COLORS=true
+export DISABLE_MAGIC_FUNCTIONS=true
+source $ZSH/oh-my-zsh.sh
+
+#############################
+# $PKG_CONFIG_PATH variable #
+#############################
+
+export PKG_CONFIG_PATH="/usr/local/opt/icu4c@76/lib/pkgconfig:$PKG_CONFIG_PATH"
 
 #######################
 # Interactive options #
@@ -72,7 +65,8 @@ if [[ $- =~ i ]]; then
   setopt brace_ccl
 
   # https://github.com/sindresorhus/pure
-  autoload -U promptinit; promptinit
+  autoload -U promptinit
+  promptinit
   prompt pure
 fi
 
@@ -85,22 +79,30 @@ unsetopt extendedglob
 
 alias g="git"
 alias ga="git add"
+alias gap="git add -p"
 alias gp="git push"
 alias gb="git branch"
 alias gc="git commit"
 alias gd="git diff"
+alias gds="git diff --staged"
+alias gl="git log --oneline -p"
 alias gr="git rebase"
+alias gs="git status"
 alias gt="git tag"
 alias gf="git fetch"
 alias co="git checkout"
 alias gcp="git cherry-pick --continue"
 alias amend="git commit --amend --no-edit"
+alias diffb='git show $(git merge-range)'
 
 # Shows new changes in a specific file.
 alias fdiff="git diff HEAD --"
 
 # Reverts a specific file back to the HEAD.
 alias revert="git co HEAD --"
+
+# Push a WIP commit
+alias wip="git-wip"
 
 # Delete a branch locally and remotely
 alias branchd="git-branch-delete"
@@ -116,6 +118,33 @@ alias tagda="git-tag-delete-all"
 # Remove paths matching .gitignore globs
 alias ignore="git rm -r --cached . && git add ."
 
+# Conventional commits
+alias chore="git-cc chore"
+alias feat="git-cc feat"
+alias fix="git-cc fix"
+
+# Breaking changes
+alias feat!="git-cc feat!"
+alias fix!="git-cc fix!"
+
+git-cc() {
+  if [ $# -ge 3 ] && [[ ! $3 =~ ^- ]]; then
+    local type=$1
+    local scope=$2
+    local msg=$3
+    if [[ $type == *"!" ]]; then
+      type=${type%?}
+      git commit -m "$type($scope)!: $msg" ${@:4}
+    else
+      git commit -m "$type($scope): $msg" ${@:4}
+    fi
+  elif [ $# -ge 2 ]; then
+    git commit -m "$1: $2" ${@:3}
+  else
+    return 1
+  fi
+}
+
 # Create a single commit git-patch and pbcopy it.
 pbpatch() {
   if [ $# -eq 1 ]; then
@@ -125,16 +154,21 @@ pbpatch() {
   fi
 }
 
+git-reword() {
+  git commit --fixup reword:$1 &&
+    GIT_EDITOR="cat" git rebase --autosquash -i $1^
+}
+
 # gcm [commit:-HEAD]
 alias gcm="git-commit-message"
-git-commit-message () {
+git-commit-message() {
   git log "$1^..$1" --pretty=%B
 }
 
 # tagd <tag> <commit> ...
-git-tag-back () {
+git-tag-back() {
   GIT_COMMITTER_DATE="$(git show $2 --format=%aD | head -1)" \
-  git tag $@
+    git tag $@
 }
 
 # tagf <remote> <tag>
@@ -143,66 +177,134 @@ git-tag-fetch() {
 }
 
 # tagd <tag>
-git-tag-delete () {
+git-tag-delete() {
   git tag -d $1
   git push origin :$1
 }
 
 # tagda (local only)
-git-tag-delete-all () {
+git-tag-delete-all() {
   git tag -d $(git tag -l)
 }
 
 # branchd <branch-name>
-git-branch-delete () {
+git-branch-delete() {
   git branch -D $1
   git push origin --delete $1
+}
+
+git-wip() {
+  git add -A
+  git commit -m "wip"
+  git push
 }
 
 #################
 # Miscellaneous #
 #################
 
-alias inspect='NODE_OPTIONS="--inspect"'
-alias inspect-brk='NODE_OPTIONS="--inspect-brk"'
+export PNPM_HOME="$HOME/Library/pnpm"
+export PATH="$PNPM_HOME:$PATH"
 
-JEST_NO_CACHE="./node_modules/.bin/jest -i --no-cache --watch"
-alias jest-dbg="$JEST_NO_CACHE"
-alias jest-brk="node --inspect-brk $JEST_NO_CACHE"
+# https://github.com/okbob/pspg
+export PSQL_PAGER='pspg -X -b'
 
-# rm == move to trash
-alias _rm="$(which rm)"
-alias rm="del"
-del() {
-  while [ -n "$1" ]; do
-    if [ ! -e "$1" -a ! -h "$1" ]; then
-      echo "'$1' not found; exiting"
-      return
-    fi
+# Preferred CLI editor
+export EDITOR="/usr/bin/vim"
 
-    local file=`basename -- "$1"`
+# Go up two directories
+alias ...="cd ../.."
 
-    # Chop trailing '/' if there
-    file=${file%/}
+# Recursive destroy
+alias rm!="rm -rf --direct"
 
-    local destination=''
+# Open in text editor
+alias edit="code"
 
-    if [ -e "$HOME/.Trash/$file" ]; then
-      # Extract file and extension
-      local ext=`expr "$file" : ".*\(\.[^\.]*\)$"`
-      local base=${file%$ext}
+# Ripgrep with max line preview
+alias rgc="rg --max-columns=100 --max-columns-preview"
 
-      # Add a space between base and timestamp
-      test -n "$base" && base="$base "
+# File scaffolding
+alias ff="source ~/dev/bin/fileform"
 
-      destination="/$base`date +%H-%M-%S`_$RANDOM$ext"
-    fi
+alias inspect='NODE_OPTIONS="--inspect --enable-source-maps"'
+alias inspect-brk='NODE_OPTIONS="--inspect-brk --enable-source-maps"'
 
-    echo "Moving '$1' to '$HOME/.Trash$destination'"
-    \mv -i -- "$1" "$HOME/.Trash$destination" || return
-    shift
- done
+random_str() {
+  echo $(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w ${1:-16} | head -n 1)
 }
 
-export PNPM_HOME="/Users/alec/Library/pnpm"
-export PATH="$PNPM_HOME:$PATH"
+url_decode() {
+  node -e "console.log(decodeURIComponent('$1'))"
+}
+
+url_encode() {
+  node -e "console.log(encodeURIComponent('$1'))"
+}
+
+# HTTPie localhost
+lh() {
+  local url="https://localhost:${1#*:}/"
+  shift
+  echo "http --verify=false \"${@/#/:}\" \"$url\""
+  http --verify=false "${@/#/:}" "$url"
+}
+
+# Lazy-loaded NodeJS version manager
+nvm() {
+  . ~/.nvm/nvm.sh && nvm $@
+}
+
+send_pr() {
+  echo -n "Branch name: "
+  read branch_name
+
+  echo -n "Cherry pick: "
+  read commit
+
+  local target_branch="${1:-origin/master}"
+  git checkout -b "$branch_name" "$target_branch" --no-track
+  git cherry-pick "$commit"
+
+  git show --color=always head | cat
+  echo -n "Continue? [y/N] "
+  read continue
+
+  if [ "$continue" = "y" ]; then
+    local target_branch_name="${target_branch##*/}"
+    gh pr create --fill --base="$target_branch_name"
+  else
+    echo "Aborting..."
+    git checkout -
+    git branch -D "$branch_name"
+  fi
+}
+
+#compdef pnpm
+###-begin-pnpm-completion-###
+if type compdef &>/dev/null; then
+  _pnpm_completion () {
+    local reply
+    local si=$IFS
+
+    IFS=$'\n' reply=($(COMP_CWORD="$((CURRENT-1))" COMP_LINE="$BUFFER" COMP_POINT="$CURSOR" SHELL=zsh pnpm completion-server -- "${words[@]}"))
+    IFS=$si
+
+    if [ "$reply" = "__tabtab_complete_files__" ]; then
+      _files
+    else
+      _describe 'values' reply
+    fi
+  }
+  # When called by the Zsh completion system, this will end with
+  # "loadautofunc" when initially autoloaded and "shfunc" later on, otherwise,
+  # the script was "eval"-ed so use "compdef" to register it with the
+  # completion system
+  if [[ $zsh_eval_context == *func ]]; then
+    _pnpm_completion "$@"
+  else
+    compdef _pnpm_completion pnpm
+  fi
+fi
+###-end-pnpm-completion-###
+

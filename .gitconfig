@@ -8,6 +8,10 @@
 	clean = git media clean %f
 	smudge = git media smudge %f
 [alias]
+	rb = "!git for-each-ref --sort=-committerdate refs/heads/ --format='%(committerdate:iso8601) %(refname:short)'"
+	bb = "!git branch | grep -v HEAD | while read b; do git log --color --format=\"%ci _%C(magenta)%cr %C(bold cyan)$b%Creset %s %C(bold blue)<%an>%Creset\" $b | head -n 1; done | sort -r | cut -d_ -f2- | sed 's;origin/;;g' | head -10"
+	bbr = "!git branch -r | grep -v HEAD | while read b; do git log --color --format=\"%ci _%C(magenta)%cr %C(bold cyan)$b%Creset %s %C(bold blue)<%an>%Creset\" $b | head -n 1; done | sort -r | cut -d_ -f2- | sed 's;origin/;;g' | head -10"
+	delete-current-branch = "!BRANCH=$(git rev-parse --abbrev-ref HEAD) && git checkout - && git branch -D $BRANCH"
 	tagcommit = rev-list -n 1
 	unpushed = diff origin/master..HEAD --name-status
 	revert-unstaged = "!sh -c '{ git commit -m=tmp && git reset --hard HEAD && git reset --soft HEAD^ || git reset --hard HEAD; } > /dev/null 2>&1; git status' -"
@@ -23,14 +27,17 @@
 	cp = cherry-pick
 	reinit = update-ref -d HEAD
 	cob = checkout -b
-	fixup = "!sh -c '(git diff-files --quiet || (echo Unstaged changes, please commit or stash with --keep-index; exit 1)) && COMMIT=$(git rev-parse $1) && git commit --fixup=$COMMIT && git rebase -i --autosquash $COMMIT~1' -"
+	fixup = "!sh -c '(git diff-files --ignore-submodules --quiet || (echo Unstaged changes, please commit or stash with --keep-index; exit 1)) && COMMIT=$(git rev-parse $1) && git commit --fixup=$COMMIT && git rebase -i --autosquash $COMMIT~1' -"
 	anw = !git diff -U0 -w --no-color -- \"$@\" | git apply --cached --ignore-whitespace --unidiff-zero "#"
+	sup = !git log --pretty=format:\"%h - %s (%ad)\" --shortstat --date=format:'%Y-%m-%d %H:%M:%S'
+	merge-range = !sh -c 'echo "$(git merge-base head main)..head"'
 [push]
+	autoSetupRemote = true
 	default = upstream
 [core]
 	editor = /usr/bin/vim
-	excludesfile = ~/.gitignore
-	pager = less -x1,3
+	excludesfile = ~/dev/.gitignore
+	pager = less --tabs 2
 [pager]
 	branch = false
 [filter "lfs"]
