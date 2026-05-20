@@ -1,0 +1,6 @@
+{
+  "semanticTokens.enable": true,
+  "semanticTokens.filetypes": [
+    "typescriptreact"
+  ]
+}
