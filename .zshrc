@@ -1,17 +1,17 @@
-export HD2="/Volumes/Macintosh HD 2"
+export NODE_AUTH_TOKEN="$(cat ~/.config/gh/token)"
+
+alias p="pnpm"
+alias bw="pnpm boardwaves"
 
 ##################
 # $PATH variable #
 ##################
 
-# Node 23.7
-export PATH="$HOME/.nvm/versions/node/v23.7.0/bin:$PATH"
+# java
+export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 
 # rust
 export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
-
-# python
-export PATH="$HOME/.pyenv/versions/2.7.18/bin:$PATH"
 
 # postgres
 export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
@@ -21,14 +21,21 @@ export GOPATH="$HOME/.go"
 export GOBIN="$GOPATH/bin"
 export PATH="$GOBIN:$PATH"
 
-# flutter
-export PATH="$HOME/dev/flutter/bin:$PATH"
+# homebrew
+export PATH="/opt/homebrew/bin:$PATH"
+
+# pnpm
+export PNPM_HOME="$HOME/dev/.pnpm"
+export PATH="$PNPM_HOME:$PATH"
+
+# bun
+export PATH="$HOME/.bun/bin:$PATH"
+
+# dart
+export PATH="$HOME/.pub-cache/bin:$PATH"
 
 # Custom binaries
 export PATH="$HOME/dev/bin:$HOME/.local/bin:$PATH"
-
-# homebrew
-export PATH="/usr/local/bin:$PATH"
 
 ##############
 # ZSH config #
@@ -38,7 +45,7 @@ export PATH="/usr/local/bin:$PATH"
 fpath+=("$(brew --prefix)/share/zsh/site-functions")
 
 # zsh plugins
-plugins=(z fzf careful_rm)
+plugins=(z fzf)
 
 # oh-my-zsh
 export ZSH=$HOME/.oh-my-zsh
@@ -47,11 +54,21 @@ export DISABLE_LS_COLORS=true
 export DISABLE_MAGIC_FUNCTIONS=true
 source $ZSH/oh-my-zsh.sh
 
-#############################
-# $PKG_CONFIG_PATH variable #
-#############################
+###################
+# Other variables #
+###################
 
 export PKG_CONFIG_PATH="/usr/local/opt/icu4c@76/lib/pkgconfig:$PKG_CONFIG_PATH"
+
+# Android SDK
+export ANDROID_HOME="$HOME/Library/Android/sdk"
+export NDK_HOME="$ANDROID_HOME/ndk/$(ls -1 $ANDROID_HOME/ndk)"
+export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+export PATH="$NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/bin:$PATH"
+export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+export GRADLE_USER_HOME="$HOME/dev/Library/gradle"
+
+alias adb="$HOME/Library/Android/sdk/platform-tools/adb"
 
 #######################
 # Interactive options #
@@ -81,6 +98,7 @@ alias g="git"
 alias ga="git add"
 alias gap="git add -p"
 alias gp="git push"
+alias gl="git pull"
 alias gb="git branch"
 alias gc="git commit"
 alias gd="git diff"
@@ -88,7 +106,6 @@ alias gds="git diff --staged"
 alias gl="git log --oneline -p"
 alias gr="git rebase"
 alias gs="git status"
-alias gt="git tag"
 alias gf="git fetch"
 alias co="git checkout"
 alias gcp="git cherry-pick --continue"
@@ -203,20 +220,31 @@ git-wip() {
 # Miscellaneous #
 #################
 
-export PNPM_HOME="$HOME/Library/pnpm"
-export PATH="$PNPM_HOME:$PATH"
+export REQUESTS_CA_BUNDLE="$(mkcert -CAROOT)/rootCA.pem"
 
 # https://github.com/okbob/pspg
 export PSQL_PAGER='pspg -X -b'
 
 # Preferred CLI editor
-export EDITOR="/usr/bin/vim"
+export EDITOR="/opt/homebrew/bin/nvim"
+alias vim="nvim"
 
 # Go up two directories
 alias ...="cd ../.."
 
-# Recursive destroy
-alias rm!="rm -rf --direct"
+alias pi-fast="pi --model 'github-copilot/gemini-3-flash-preview' --thinking high"
+alias pi-slow="pi --model 'github-copilot/gemini-3.1-pro-preview' --thinking high"
+alias pi-sonnet="pi --model 'github-copilot/claude-sonnet-4.6' --thinking medium"
+alias pi-codex="pi --model 'openai-codex/gpt-5.3-codex' --thinking high"
+alias pi-speckle="pi --subagent speckle --model 'openai-codex/gpt-5.4' --thinking high"
+
+alias god=goddard
+
+# Safe remove
+alias rm="safe-rm"
+
+# Unsafe recursive remove
+alias rm!="/bin/rm -rf"
 
 # Open in text editor
 alias edit="code"
@@ -280,31 +308,20 @@ send_pr() {
   fi
 }
 
-#compdef pnpm
-###-begin-pnpm-completion-###
-if type compdef &>/dev/null; then
-  _pnpm_completion () {
-    local reply
-    local si=$IFS
+# Added by Windsurf
+export PATH="/Users/alec/.codeium/windsurf/bin:$PATH"
 
-    IFS=$'\n' reply=($(COMP_CWORD="$((CURRENT-1))" COMP_LINE="$BUFFER" COMP_POINT="$CURSOR" SHELL=zsh pnpm completion-server -- "${words[@]}"))
-    IFS=$si
+# bun completions
+[ -s "/Users/alec/.bun/_bun" ] && source "/Users/alec/.bun/_bun"
 
-    if [ "$reply" = "__tabtab_complete_files__" ]; then
-      _files
-    else
-      _describe 'values' reply
-    fi
-  }
-  # When called by the Zsh completion system, this will end with
-  # "loadautofunc" when initially autoloaded and "shfunc" later on, otherwise,
-  # the script was "eval"-ed so use "compdef" to register it with the
-  # completion system
-  if [[ $zsh_eval_context == *func ]]; then
-    _pnpm_completion "$@"
-  else
-    compdef _pnpm_completion pnpm
-  fi
-fi
-###-end-pnpm-completion-###
+if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi
 
+source <(daemon completion zsh)
+
+## [Completion]
+## Completion scripts setup. Remove the following line to uninstall
+[[ -f /Users/alec/.dart-cli-completion/zsh-config.zsh ]] && . /Users/alec/.dart-cli-completion/zsh-config.zsh || true
+## [/Completion]
+
+
+if command -v git-wt >/dev/null 2>&1; then eval "$(command git-wt config shell init zsh)"; fi
