@@ -1,320 +1,237 @@
-[[ -f ~/.config/gh/token ]] && export NODE_AUTH_TOKEN="$(<~/.config/gh/token)"
+unsetopt EXTENDED_GLOB
+unsetopt KSH_GLOB
+setopt NO_NOMATCH
 
-##################
-# $PATH variable #
-##################
+# Treat path separators, dots, hyphens, and underscores as word boundaries.
+WORDCHARS=${WORDCHARS//[\/._-]}
 
-typeset -U path PATH
-
-export GOPATH="$HOME/.go"
-export GOBIN="$GOPATH/bin"
 export PNPM_HOME="$HOME/dev/.pnpm"
 
 path=(
   /opt/homebrew/bin
-  /opt/homebrew/opt/openjdk/bin
-  /opt/homebrew/opt/rustup/bin
-  /opt/homebrew/opt/postgresql@17/bin
-  "$GOBIN"
-  "$PNPM_HOME"
-  "$HOME/.bun/bin"
-  "$HOME/.pub-cache/bin"
-  "$HOME/dev/bin"
-  "$HOME/.local/bin"
-  $path
+  $HOME/dev/bin
+  $HOME/dev/.pnpm/bin
+  $PNPM_HOME
+  $HOME/.cargo/bin
+  $HOME/.bun/bin
+  $HOME/.deno/bin
+  $HOME/.local/bin
+  ${path[@]}
 )
 
-# Added by Windsurf
-[[ -d "$HOME/.codeium/windsurf/bin" ]] && path=("$HOME/.codeium/windsurf/bin" $path)
-
-###################
-# Other variables #
-###################
-
-export PKG_CONFIG_PATH="/usr/local/opt/icu4c@76/lib/pkgconfig:$PKG_CONFIG_PATH"
-
-# Android SDK
-export ANDROID_HOME="$HOME/Library/Android/sdk"
-export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
-export GRADLE_USER_HOME="$HOME/dev/Library/gradle"
-
-if [[ -d "$ANDROID_HOME/ndk" ]]; then
-  ndk_version="$(ls -1 "$ANDROID_HOME/ndk" 2>/dev/null | sort | tail -n 1)"
-  if [[ -n "$ndk_version" ]]; then
-    export NDK_HOME="$ANDROID_HOME/ndk/$ndk_version"
-    path=("$NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/bin" $path)
-  fi
-  unset ndk_version
-fi
-
-[[ -d "$ANDROID_HOME/cmdline-tools/latest/bin" ]] && path=("$ANDROID_HOME/cmdline-tools/latest/bin" $path)
-
-command -v mkcert >/dev/null 2>&1 && export REQUESTS_CA_BUNDLE="$(mkcert -CAROOT)/rootCA.pem"
-
-# https://github.com/okbob/pspg
-export PSQL_PAGER='pspg -X -b'
+# Node auth token for private npm packages
+export NODE_AUTH_TOKEN="$(cat ~/.config/gh/token)"
 
 # Preferred CLI editor
 export EDITOR="/opt/homebrew/bin/nvim"
+alias vim="nvim"
 
-#######################
-# Interactive options #
-#######################
+# Go up two directories
+alias ...="cd ../.."
 
-if [[ $- =~ i ]]; then
-  ##############
-  # ZSH config #
-  ##############
+-() { cd -; }
 
-  if command -v brew >/dev/null 2>&1; then
-    fpath+=("$(brew --prefix)/share/zsh/site-functions")
-  fi
+alias p="pnpm"
+alias b="bun"
 
-  plugins=(z fzf)
+# Safe remove
+alias rm="safe-rm"
 
-  export ZSH="$HOME/.oh-my-zsh"
-  export DISABLE_AUTO_UPDATE=true
-  export DISABLE_LS_COLORS=true
-  export DISABLE_MAGIC_FUNCTIONS=true
-  [[ -f "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
+# Unsafe recursive remove
+alias rm!="/bin/rm -rf"
 
-  # Assume `cd` when executing a directory
-  setopt autocd
+alias sb="sprint-branch"
+alias sprint="sprint-branch"
+alias rs="review-sync"
+alias review="review-sync"
 
-  # Expand "{1-3}.png" to "1.png 2.png 3.png"
-  setopt brace_ccl
+alias amend="git commit --amend --no-edit"
+alias lastcommit="git show HEAD"
 
-  # https://github.com/sindresorhus/pure
-  autoload -U promptinit
-  promptinit
-  prompt pure
+alias g="git"
+alias ga="git add"
+alias gap="git add -p"
+alias gp="git push"
+alias gb="git branch"
+alias gc="git commit"
+alias gd="git diff"
+alias gds="git diff --staged"
+alias gl="git log --oneline"
+alias gm="git merge --ff-only"
+alias gr="git rebase"
+alias gs="git status"
+alias gf="git fetch"
+alias co="git checkout"
+alias gcp="git cherry-pick --continue"
 
-  # See here: https://github.com/ohmyzsh/ohmyzsh/issues/449#issuecomment-1466968
-  unsetopt extendedglob
-
-  ###############
-  # Git related #
-  ###############
-
-  alias g="git"
-  alias ga="git add"
-  alias gap="git add -p"
-  alias gp="git push"
-  alias gpl="git pull"
-  alias gb="git branch"
-  alias gc="git commit"
-  alias gd="git diff"
-  alias gds="git diff --staged"
-  alias gl="git log --oneline -p"
-  alias gr="git rebase"
-  alias gs="git status"
-  alias gf="git fetch"
-  alias co="git checkout"
-  alias gcp="git cherry-pick --continue"
-  alias amend="git commit --amend --no-edit"
-  alias gcm="git-commit-message"
-  alias diffb='git show $(git merge-range)'
-
-  # Shows new changes in a specific file.
-  alias fdiff="git diff HEAD --"
-
-  # Reverts a specific file back to the HEAD.
-  alias revert="git checkout HEAD --"
-
-  # Push a WIP commit
-  alias wip="git-wip"
-
-  # Delete a branch locally and remotely
-  alias branchd="git-branch-delete"
-
-  # Tag an old commit
-  alias btag="git-tag-back"
-
-  # Tag utils
-  alias tagf="git-tag-fetch"
-  alias tagd="git-tag-delete"
-  alias tagda="git-tag-delete-all"
-
-  # Remove paths matching .gitignore globs
-  alias ignore="git rm -r --cached . && git add ."
-
-  # Conventional commits
-  alias chore="git-cc chore"
-  alias feat="git-cc feat"
-  alias fix="git-cc fix"
-
-  # Breaking changes
-  alias feat!="git-cc feat!"
-  alias fix!="git-cc fix!"
-
-  #################
-  # Miscellaneous #
-  #################
-
-  alias p="pnpm"
-  alias bw="pnpm boardwaves"
-  alias adb="$ANDROID_HOME/platform-tools/adb"
-  alias vim="nvim"
-
-  # Go up two directories
-  alias ...="cd ../.."
-
-  alias pi-fast="pi --model 'github-copilot/gemini-3-flash-preview' --thinking high"
-  alias pi-slow="pi --model 'github-copilot/gemini-3.1-pro-preview' --thinking high"
-  alias pi-sonnet="pi --model 'github-copilot/claude-sonnet-4.6' --thinking medium"
-  alias pi-codex="pi --model 'openai-codex/gpt-5.3-codex' --thinking high"
-  alias pi-speckle="pi --subagent speckle --model 'openai-codex/gpt-5.4' --thinking high"
-
-  command -v goddard >/dev/null 2>&1 && alias god=goddard
-
-  # Safe remove
-  command -v safe-rm >/dev/null 2>&1 && alias rm="safe-rm"
-
-  # Unsafe recursive remove
-  alias rm!="/bin/rm -rf"
-
-  # Open in text editor
-  command -v code >/dev/null 2>&1 && alias edit="code"
-
-  # Ripgrep with max line preview
-  alias rgc="rg --max-columns=100 --max-columns-preview"
-
-  # File scaffolding
-  [[ -f "$HOME/dev/bin/fileform" ]] && alias ff="source ~/dev/bin/fileform"
-
-  alias inspect='NODE_OPTIONS="--inspect --enable-source-maps"'
-  alias inspect-brk='NODE_OPTIONS="--inspect-brk --enable-source-maps"'
-
-  # bun completions
-  [[ -s "$HOME/.bun/_bun" ]] && source "$HOME/.bun/_bun"
-
-  command -v wt >/dev/null 2>&1 && eval "$(command wt config shell init zsh)"
-  command -v daemon >/dev/null 2>&1 && source <(daemon completion zsh)
-  [[ -f "$HOME/.dart-cli-completion/zsh-config.zsh" ]] && source "$HOME/.dart-cli-completion/zsh-config.zsh"
-  command -v git-wt >/dev/null 2>&1 && eval "$(command git-wt config shell init zsh)"
-fi
-
-#############
-# Functions #
-#############
-
-git-cc() {
-  if [ $# -ge 3 ] && [[ ! $3 =~ ^- ]]; then
-    local type=$1
-    local scope=$2
-    local msg=$3
-    if [[ $type == *"!" ]]; then
-      type=${type%?}
-      git commit -m "$type($scope)!: $msg" "${@:4}"
-    else
-      git commit -m "$type($scope): $msg" "${@:4}"
-    fi
-  elif [ $# -ge 2 ]; then
-    git commit -m "$1: $2" "${@:3}"
-  else
-    return 1
-  fi
+# git copy-commit-message [commit:-HEAD]
+git-copy-commit-message() {
+  git log "$1^..$1" --pretty=%B
 }
 
-# Create a single commit git-patch and pbcopy it.
-pbpatch() {
-  if [ $# -eq 1 ]; then
-    git format-patch --stdout -1 "$1" | pbcopy
-  elif [ $# -eq 0 ]; then
-    pbpaste | git am
-  fi
-}
-
-git-reword() {
-  git commit --fixup "reword:$1" &&
-    GIT_EDITOR="cat" git rebase --autosquash -i "$1^"
-}
-
-# gcm [commit:-HEAD]
-git-commit-message() {
-  git log "${1:-HEAD}^..${1:-HEAD}" --pretty=%B
-}
-
-# tagd <tag> <commit> ...
-git-tag-back() {
-  GIT_COMMITTER_DATE="$(git show "$2" --format=%aD | head -1)" \
-    git tag "$@"
-}
-
-# tagf <remote> <tag>
-git-tag-fetch() {
-  git fetch "$1" "refs/tags/$2:refs/tags/$2" --no-tags "${@:3}"
-}
-
-# tagd <tag>
-git-tag-delete() {
-  git tag -d "$1"
-  git push origin ":$1"
-}
-
-# tagda (local only)
-git-tag-delete-all() {
-  git tag -d $(git tag -l)
-}
-
-# branchd <branch-name>
-git-branch-delete() {
-  git branch -D "$1"
-  git push origin --delete "$1"
-}
-
-git-wip() {
-  git add -A
-  git commit -m "wip"
-  git push
-}
-
-random_str() {
-  LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w "${1:-16}" | head -n 1
-}
-
-url_decode() {
-  node -e 'console.log(decodeURIComponent(process.argv[1]))' "$1"
-}
-
-url_encode() {
-  node -e 'console.log(encodeURIComponent(process.argv[1]))' "$1"
-}
-
-# HTTPie localhost
-lh() {
-  local url="https://localhost:${1#*:}/"
+# git merge-detached <target-branch>
+git-merge-detached() {
+  local temp="tmp-merge-$$"
+  local target="${1:?usage: git-merge-detached <target-branch>}"
+  local original_dir="$PWD"
+  local target_worktree
   shift
-  echo "http --verify=false \"${@/#/:}\" \"$url\""
-  http --verify=false "${@/#/:}" "$url"
-}
 
-# Lazy-loaded NodeJS version manager
-nvm() {
-  . ~/.nvm/nvm.sh && nvm "$@"
-}
+  target_worktree=$(git worktree list --porcelain | awk -v branch="refs/heads/$target" '
+    /^worktree / { path = substr($0, 10) }
+    $0 == "branch " branch { print path; exit }
+  ')
 
-send_pr() {
-  echo -n "Branch name: "
-  read branch_name
+  git branch "$temp" HEAD || return
 
-  echo -n "Cherry pick: "
-  read commit
-
-  local target_branch="${1:-origin/master}"
-  git checkout -b "$branch_name" "$target_branch" --no-track
-  git cherry-pick "$commit"
-
-  git show --color=always head | cat
-  echo -n "Continue? [y/N] "
-  read continue
-
-  if [ "$continue" = "y" ]; then
-    local target_branch_name="${target_branch##*/}"
-    gh pr create --fill --base="$target_branch_name"
+  if [[ -n "$target_worktree" ]]; then
+    cd "$target_worktree" || {
+      git branch -D "$temp"
+      return 1
+    }
   else
-    echo "Aborting..."
-    git checkout -
-    git branch -D "$branch_name"
+    git switch "$target" || {
+      git branch -D "$temp"
+      return 1
+    }
+  fi
+
+  git merge --ff-only "$temp" || {
+    if [[ -n "$target_worktree" ]]; then
+      cd "$original_dir"
+    else
+      git switch -
+    fi
+    git branch -D "$temp"
+    return 1
+  }
+  git branch -d "$temp" || {
+    if [[ -n "$target_worktree" ]]; then
+      cd "$original_dir"
+    else
+      git switch -
+    fi
+    git branch -D "$temp"
+    return 1
+  }
+
+  if [[ -n "$target_worktree" ]]; then
+    cd "$original_dir"
+  else
+    git switch -  # returns you to the previous detached HEAD
   fi
 }
+
+alias pi-fast="pi --model 'openai-codex/gpt-5.5' --thinking low"
+alias pi-slow="pi --model 'openai-codex/gpt-5.5' --thinking xhigh"
+
+# Start configuration added by Zim Framework install {{{
+#
+# User configuration sourced by interactive shells
+#
+
+# -----------------
+# Zsh configuration
+# -----------------
+
+#
+# History
+#
+
+# Remove older command from the history if a duplicate is to be added.
+setopt HIST_IGNORE_ALL_DUPS
+
+#
+# Input/output
+#
+
+# Set editor default keymap to emacs (`-e`) or vi (`-v`)
+bindkey -e
+
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
+
+# Prompt for spelling correction of commands.
+#setopt CORRECT
+
+# Customize spelling correction prompt.
+#SPROMPT='zsh: correct %F{red}%R%f to %F{green}%r%f [nyae]? '
+
+# --------------------
+# Module configuration
+# --------------------
+
+#
+# input
+#
+
+# Append `../` to your input for each `.` you type after an initial `..`
+#zstyle ':zim:input' double-dot-expand yes
+
+#
+# termtitle
+#
+
+# Set a custom terminal title format using prompt expansion escape sequences.
+# See http://zsh.sourceforge.net/Doc/Release/Prompt-Expansion.html#Simple-Prompt-Escapes
+# If none is provided, the default '%n@%m: %~' is used.
+#zstyle ':zim:termtitle' format '%1~'
+
+#
+# zsh-autosuggestions
+#
+
+# Disable automatic widget re-binding on each precmd. This can be set when
+# zsh-users/zsh-autosuggestions is the last module in your ~/.zimrc.
+ZSH_AUTOSUGGEST_MANUAL_REBIND=1
+
+# Customize the style that the suggestions are shown with.
+# See https://github.com/zsh-users/zsh-autosuggestions/blob/master/README.md#suggestion-highlight-style
+#ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=242'
+
+#
+# zsh-syntax-highlighting
+#
+
+# Set what highlighters will be used.
+# See https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/docs/highlighters.md
+ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
+
+# Customize the main highlighter styles.
+# See https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/docs/highlighters/main.md#how-to-tweak-it
+#typeset -A ZSH_HIGHLIGHT_STYLES
+#ZSH_HIGHLIGHT_STYLES[comment]='fg=242'
+
+# ------------------
+# Initialize modules
+# ------------------
+
+ZIM_HOME=${ZDOTDIR:-${HOME}}/.zim
+# Download zimfw plugin manager if missing.
+if [[ ! -e ${ZIM_HOME}/zimfw.zsh ]]; then
+  if (( ${+commands[curl]} )); then
+    curl -fsSL --create-dirs -o ${ZIM_HOME}/zimfw.zsh \
+        https://github.com/zimfw/zimfw/releases/latest/download/zimfw.zsh
+  else
+    mkdir -p ${ZIM_HOME} && wget -nv -O ${ZIM_HOME}/zimfw.zsh \
+        https://github.com/zimfw/zimfw/releases/latest/download/zimfw.zsh
+  fi
+fi
+# Install missing modules, and update ${ZIM_HOME}/init.zsh if missing or outdated.
+if [[ ! ${ZIM_HOME}/init.zsh -nt ${ZIM_CONFIG_FILE:-${ZDOTDIR:-${HOME}}/.zimrc} ]]; then
+  source ${ZIM_HOME}/zimfw.zsh init
+fi
+# Initialize modules.
+source ${ZIM_HOME}/init.zsh
+# }}} End configuration added by Zim Framework install
+
+# bun completions
+[ -s "/Users/alec/.bun/_bun" ] && source "/Users/alec/.bun/_bun"
+
+if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi
+
+# Keep shell history session-local after reading the existing file once.
+# Placed near the end to override framework defaults.
+setopt APPEND_HISTORY
+unsetopt INC_APPEND_HISTORY SHARE_HISTORY
+fc -R $HISTFILE
